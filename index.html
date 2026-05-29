@@ -684,6 +684,7 @@
 </footer>
 
 <script>
+  /* ── RESPONSES ── */
   const RESP = {
     e: {
       high:  "Good. Don't waste it overthinking. Open one learning resource right now — before the feeling fades.",
@@ -705,18 +706,40 @@
     }
   };
 
+  /* ── STORAGE HELPERS ── */
+  const S = {
+    get: (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+  };
+
+  /* ── WEEK KEY — resets tracker each Monday ── */
+  function getWeekKey() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+    return 'week_' + monday.toISOString().slice(0, 10);
+  }
+
+  /* ── TAB ── */
   function switchTab(id, btn) {
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     btn.classList.add('active');
+    S.set('activeTab', id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  /* ── GOALS ── */
   function toggleGoal(card) {
     card.classList.toggle('open');
+    const openGoals = Array.from(document.querySelectorAll('.goal-card.open'))
+      .map(c => c.querySelector('.goal-title').textContent);
+    S.set('openGoals', openGoals);
   }
 
+  /* ── CHECK-IN ── */
   function respond(btn, type, val) {
     const card = btn.closest('.ci-card');
     card.querySelectorAll('.ci-btn').forEach(b => b.classList.remove('sel'));
@@ -724,7 +747,82 @@
     const el = document.getElementById('r' + type);
     el.textContent = RESP[type][val];
     el.classList.add('show');
+    const ci = S.get('checkin') || {};
+    ci[type] = val;
+    S.set('checkin', ci);
   }
+
+  /* ── TRACKER: day circles ── */
+  function initTracker() {
+    const weekKey = getWeekKey();
+    const saved = S.get(weekKey) || {};
+
+    document.querySelectorAll('.tracker-card').forEach((card, ci) => {
+      const title = card.querySelector('.tracker-title').textContent.trim();
+      const noteInput = card.querySelector('.tracker-note input');
+
+      // restore days
+      card.querySelectorAll('.day-circle').forEach((circle, di) => {
+        const key = title + '_' + di;
+        if (saved[key]) circle.classList.add('done');
+
+        circle.addEventListener('click', () => {
+          circle.classList.toggle('done');
+          const data = S.get(weekKey) || {};
+          data[title + '_' + di] = circle.classList.contains('done');
+          S.set(weekKey, data);
+        });
+      });
+
+      // restore note
+      if (saved['note_' + title]) noteInput.value = saved['note_' + title];
+      noteInput.addEventListener('input', () => {
+        const data = S.get(weekKey) || {};
+        data['note_' + title] = noteInput.value;
+        S.set(weekKey, data);
+      });
+    });
+  }
+
+  /* ── RESTORE STATE ON LOAD ── */
+  function restoreState() {
+    // active tab
+    const savedTab = S.get('activeTab');
+    if (savedTab) {
+      const btn = Array.from(document.querySelectorAll('.nav-tab'))
+        .find(b => b.getAttribute('onclick').includes("'" + savedTab + "'"));
+      if (btn) switchTab(savedTab, btn);
+    }
+
+    // open goals
+    const openGoals = S.get('openGoals') || [];
+    document.querySelectorAll('.goal-card').forEach(card => {
+      const title = card.querySelector('.goal-title').textContent;
+      if (openGoals.includes(title)) card.classList.add('open');
+    });
+
+    // check-in selections
+    const ci = S.get('checkin') || {};
+    Object.entries(ci).forEach(([type, val]) => {
+      const btn = document.querySelector(`.ci-btn[onclick*="'${type}','${val}'"]`);
+      if (btn) {
+        const card = btn.closest('.ci-card');
+        card.querySelectorAll('.ci-btn').forEach(b => b.classList.remove('sel'));
+        btn.classList.add('sel');
+        const el = document.getElementById('r' + type);
+        if (el && RESP[type] && RESP[type][val]) {
+          el.textContent = RESP[type][val];
+          el.classList.add('show');
+        }
+      }
+    });
+  }
+
+  /* ── INIT ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    restoreState();
+    initTracker();
+  });
 </script>
 </body>
 </html>
