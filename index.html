@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sarah — Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:    #0e0505;
+      --bg-card:    #180808;
+      --bg-raised:  #1e0a0a;
+      --bg-hover:   #251010;
+      --border:     #3a1010;
+      --border-hi:  #6b1a1a;
+      --red:        #c0392b;
+      --red-light:  #e05040;
+      --red-dim:    #6b1a1a;
+      --gold:       #b8956a;
+      --gold-dim:   #7a5a3a;
+      --text-hi:    #ede0ce;
+      --text-mid:   #9a7a65;
+      --text-low:   #5a3a2a;
+      --text-faint: #3a1a10;
+      --rose:       #c07060;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-hi);
+      font-family: 'Playfair Display', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 48px 24px 32px;
+      border-bottom: 1px solid var(--border-hi);
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(192,57,43,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .site-title {
+      font-size: clamp(52px, 10vw, 90px);
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      color: var(--red);
+      line-height: 1;
+      position: relative;
+    }
+    .site-title em {
+      font-style: italic;
+      color: var(--text-hi);
+    }
+    .site-tagline {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      margin-top: 10px;
+    }
+    .mantra-bar {
+      background: #120606;
+      border-top: 1px solid var(--border-hi);
+      border-bottom: 1px solid var(--border-hi);
+      padding: 12px 24px;
+      text-align: center;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+    }
+    .ornament { color: var(--red); margin: 0 12px; font-size: 16px; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #0c0404;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border);
+      padding: 14px 8px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-low);
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-tab:last-child { border-right: none; }
+    .nav-tab:hover:not(.active) { color: var(--red); background: #140606; }
+    .nav-tab.active { color: var(--text-hi); background: #180808; border-bottom-color: var(--red); }
+
+    /* ── MAIN ── */
+    main { max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .sec-label {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      color: var(--text-low);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* ── TIMELINE ── */
+    .tl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .tl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .tl-card:hover { border-color: var(--border-hi); }
+    .tl-card.now { border-color: var(--red); }
+    .tl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .tl-month {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-hi);
+    }
+    .badge {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 10px;
+      padding: 2px 9px;
+      border-radius: 99px;
+    }
+    .b-now { background: var(--red-dim); color: #f0a0a0; }
+    .b-work { background: #2a1008; color: var(--gold); }
+    .b-off { background: #1a1410; color: #8a7a5a; }
+    .b-uni { background: #14101a; color: #9a8ac0; }
+    .b-shift { background: #1a1018; color: #b090c0; }
+    .tl-items { list-style: none; }
+    .tl-items li {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--text-mid);
+      padding: 3.5px 0;
+      border-bottom: 1px solid #1e0808;
+      line-height: 1.45;
+    }
+    .tl-items li:last-child { border-bottom: none; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .d-red { background: var(--red); }
+    .d-gold { background: var(--gold); }
+    .d-rose { background: var(--rose); }
+    .d-dim { background: var(--text-low); }
+
+    /* ── GOALS ── */
+    .goals-list { display: flex; flex-direction: column; gap: 10px; }
+    .goal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .goal-card:hover { border-color: var(--border-hi); }
+    .goal-card.open { border-color: var(--red-dim); }
+    .goal-header { display: flex; align-items: center; gap: 12px; }
+    .goal-icon {
+      width: 34px; height: 34px;
+      border-radius: 4px;
+      background: #2a0e0e;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 17px;
+    }
+    .goal-title { font-size: 14px; font-weight: 500; color: var(--text-hi); }
+    .goal-sub { font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--text-low); margin-top: 3px; }
+    .goal-chevron { margin-left: auto; font-size: 12px; color: var(--text-low); transition: transform 0.2s; }
+    .goal-card.open .goal-chevron { transform: rotate(180deg); }
+    .goal-body {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .goal-card.open .goal-body { display: block; }
+    .goal-steps { list-style: none; }
+    .goal-steps li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: var(--text-mid);
+      padding: 5px 0;
+      border-bottom: 1px solid #1e0808;
+      line-height: 1.55;
+    }
+    .goal-steps li:last-child { border-bottom: none; }
+    .step-num {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--red);
+      flex-shrink: 0;
+      min-width: 18px;
+      margin-top: 1px;
+    }
+
+    /* ── CHECK-IN ── */
+    .ci-list { display: flex; flex-direction: column; gap: 12px; }
+    .ci-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 18px;
+    }
+    .ci-q {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-hi);
+      margin-bottom: 12px;
+    }
+    .ci-opts { display: flex; gap: 7px; flex-wrap: wrap; }
+    .ci-btn {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      padding: 5px 14px;
+      border: 1px solid var(--border-hi);
+      border-radius: 99px;
+      background: none;
+      color: var(--text-mid);
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.15s;
+    }
+    .ci-btn:hover { border-color: var(--red); color: var(--text-hi); }
+    .ci-btn.sel { background: var(--red-dim); border-color: var(--red); color: #f0c0b0; }
+    .ci-response {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-left: 2px solid var(--red);
+      background: #120606;
+      border-radius: 0 4px 4px 0;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--gold);
+      line-height: 1.75;
+    }
+    .ci-response.show { display: block; }
+
+    /* ── TRACKER ── */
+    .tracker-list { display: flex; flex-direction: column; gap: 10px; }
+    .tracker-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 18px;
+    }
+    .tracker-title {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .days-row { display: flex; gap: 7px; flex-wrap: wrap; }
+    .day-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .day-label { font-family: 'IM Fell English', serif; font-style: italic; font-size: 11px; color: var(--text-faint); }
+    .day-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: #0e0404;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-faint);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .day-circle:hover { border-color: var(--red); color: var(--text-mid); }
+    .day-circle.done { background: #2a0e0e; border-color: var(--red); color: #f0a080; }
+    .tracker-note {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #1e0808;
+    }
+    .tracker-note input {
+      width: 100%;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-low);
+    }
+    .tracker-note input::placeholder { color: var(--text-faint); opacity: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .site-title { font-size: 48px; }
+      .tl-grid { grid-template-columns: 1fr 1fr; }
+      .nav-tab { font-size: 11px; padding: 12px 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 class="site-title">S<em>ara</em>H</h1>
+  <p class="site-tagline">[ passion — purpose — presence ]</p>
+</header>
+
+<div class="mantra-bar">
+  <span class="ornament">✦</span>
+  One day isn't much effort — but it makes a difference. Time will pass anyway.
+  <span class="ornament">✦</span>
+</div>
+
+<nav>
+  <button class="nav-tab active" onclick="switchTab('timeline', this)">Timeline</button>
+  <button class="nav-tab" onclick="switchTab('goals', this)">Goals</button>
+  <button class="nav-tab" onclick="switchTab('checkin', this)">Check in</button>
+  <button class="nav-tab" onclick="switchTab('tracker', this)">This week</button>
+</nav>
+
+<main>
+
+  <!-- TIMELINE -->
+  <div id="timeline" class="section active">
+    <p class="sec-label">— May through November —</p>
+    <div class="tl-grid">
+      <div class="tl-card now">
+        <div class="tl-head"><span class="tl-month">May – June</span><span class="badge b-now">now</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-red"></span>3-day trial at nephrology cabinet</li>
+          <li><span class="dot d-gold"></span>Start learning data analytics</li>
+          <li><span class="dot d-rose"></span>Go out — leave the bed</li>
+          <li><span class="dot d-red"></span>Full work resumes June 21</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">June</span><span class="badge b-work">work</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-red"></span>Work 4× a week from the 21st</li>
+          <li><span class="dot d-gold"></span>Build analytics skills daily</li>
+          <li><span class="dot d-dim"></span>Start saving for laptop</li>
+          <li><span class="dot d-rose"></span>Body care & home habit</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">July</span><span class="badge b-work">work</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-red"></span>Work 4× a week</li>
+          <li><span class="dot d-rose"></span>Join a gym</li>
+          <li><span class="dot d-gold"></span>First real data project</li>
+          <li><span class="dot d-dim"></span>Laptop fund growing</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">August</span><span class="badge b-off">break</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-dim"></span>No work — recharge</li>
+          <li><span class="dot d-gold"></span>Keep learning, no pressure</li>
+          <li><span class="dot d-rose"></span>Fashion design course starts</li>
+          <li><span class="dot d-red"></span>Sew something small</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">September</span><span class="badge b-work">work</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-red"></span>Work resumes 4×/week</li>
+          <li><span class="dot d-gold"></span>Power up the portfolio</li>
+          <li><span class="dot d-dim"></span>Buy the laptop</li>
+          <li><span class="dot d-rose"></span>Gym continues</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">October</span><span class="badge b-uni">uni + work</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-gold"></span>Master 2 begins</li>
+          <li><span class="dot d-red"></span>Work 4× while studying</li>
+          <li><span class="dot d-dim"></span>Scope final year project</li>
+          <li><span class="dot d-rose"></span>ML / NLP foundations</li>
+        </ul>
+      </div>
+      <div class="tl-card">
+        <div class="tl-head"><span class="tl-month">Nov – Dec</span><span class="badge b-shift">transition</span></div>
+        <ul class="tl-items">
+          <li><span class="dot d-gold"></span>Analyst → scientist shift</li>
+          <li><span class="dot d-red"></span>Final year project live</li>
+          <li><span class="dot d-rose"></span>First garment complete</li>
+          <li><span class="dot d-dim"></span>Hireable. Actually.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div id="goals" class="section">
+    <p class="sec-label">— what you're building toward —</p>
+    <div class="goals-list">
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">💼</div>
+          <div>
+            <div class="goal-title">Keep working — make your own money</div>
+            <div class="goal-sub">Nephrology cabinet → build real independence</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Show up for the 3-day trial. Do it well.</li>
+            <li><span class="step-num">ii.</span>From June 21, treat 4×/week as non-negotiable</li>
+            <li><span class="step-num">iii.</span>Track every month you stayed consistent</li>
+            <li><span class="step-num">iv.</span>This isn't a gap to fill — it's proof you can hold something</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">💻</div>
+          <div>
+            <div class="goal-title">Buy a better laptop</div>
+            <div class="goal-sub">Save from work → buy by September</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Set a rough target price — even a range helps</li>
+            <li><span class="step-num">ii.</span>Each work month, put aside a fixed amount</li>
+            <li><span class="step-num">iii.</span>Research specs good for data science and ML</li>
+            <li><span class="step-num">iv.</span>Buy it in September, before Master 2 starts</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">📊</div>
+          <div>
+            <div class="goal-title">Become a hireable data analyst</div>
+            <div class="goal-sub">Learn → build → teach → transition to data science</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Learn consistently — SQL, Python, visualisation</li>
+            <li><span class="step-num">ii.</span>Build 2–3 real, powerful portfolio projects</li>
+            <li><span class="step-num">iii.</span>Be able to explain your work without notes</li>
+            <li><span class="step-num">iv.</span>When you can teach it — you're there</li>
+            <li><span class="step-num">v.</span>Nov/Dec: move toward data science with Master 2</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">🏋️</div>
+          <div>
+            <div class="goal-title">Start the gym</div>
+            <div class="goal-sub">July — take care of your body</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Pick one gym near you in June — just know where it is</li>
+            <li><span class="step-num">ii.</span>Sign up in July, no overthinking</li>
+            <li><span class="step-num">iii.</span>Go twice a week to start. That's it.</li>
+            <li><span class="step-num">iv.</span>Keep going in September and beyond</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">✂️</div>
+          <div>
+            <div class="goal-title">Fashion design — make your own clothes</div>
+            <div class="goal-sub">Course in August, first garment by December</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Find a course and enroll — August</li>
+            <li><span class="step-num">ii.</span>Learn the basics formally, not just by feel</li>
+            <li><span class="step-num">iii.</span>Make one complete garment by end of year</li>
+            <li><span class="step-num">iv.</span>Keep it a joy — not a project, not a hustle</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="goal-card" onclick="toggleGoal(this)">
+        <div class="goal-header">
+          <div class="goal-icon">☀️</div>
+          <div>
+            <div class="goal-title">Do things — produce more than you consume</div>
+            <div class="goal-sub">Go out, stay clean, move, be present</div>
+          </div>
+          <span class="goal-chevron">▾</span>
+        </div>
+        <div class="goal-body">
+          <ul class="goal-steps">
+            <li><span class="step-num">i.</span>Leave the house at least 3× a week, not just for work</li>
+            <li><span class="step-num">ii.</span>10 minutes of cleaning counts. Do it.</li>
+            <li><span class="step-num">iii.</span>Body care as a daily baseline — not a reward</li>
+            <li><span class="step-num">iv.</span>Time spent on phone is time that passed anyway</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CHECK-IN -->
+  <div id="checkin" class="section">
+    <p class="sec-label">— how are you actually doing? —</p>
+    <div class="ci-list">
+
+      <div class="ci-card">
+        <p class="ci-q">Today I feel like...</p>
+        <div class="ci-opts">
+          <button class="ci-btn" onclick="respond(this,'e','high')">Motivated, ready</button>
+          <button class="ci-btn" onclick="respond(this,'e','mid')">Fine, just okay</button>
+          <button class="ci-btn" onclick="respond(this,'e','low')">Tired, not feeling it</button>
+          <button class="ci-btn" onclick="respond(this,'e','stuck')">Stuck in my head</button>
+        </div>
+        <div class="ci-response" id="re"></div>
+      </div>
+
+      <div class="ci-card">
+        <p class="ci-q">The last few days I've been...</p>
+        <div class="ci-opts">
+          <button class="ci-btn" onclick="respond(this,'a','doing')">Actually doing things</button>
+          <button class="ci-btn" onclick="respond(this,'a','some')">A bit of both</button>
+          <button class="ci-btn" onclick="respond(this,'a','avoiding')">Mostly avoiding</button>
+          <button class="ci-btn" onclick="respond(this,'a','spiral')">Overthinking, not moving</button>
+        </div>
+        <div class="ci-response" id="ra"></div>
+      </div>
+
+      <div class="ci-card">
+        <p class="ci-q">What do I actually need right now?</p>
+        <div class="ci-opts">
+          <button class="ci-btn" onclick="respond(this,'n','push')">Be direct with me</button>
+          <button class="ci-btn" onclick="respond(this,'n','remind')">Remind me why this matters</button>
+          <button class="ci-btn" onclick="respond(this,'n','small')">One small thing to do now</button>
+          <button class="ci-btn" onclick="respond(this,'n','rest')">Permission to rest</button>
+        </div>
+        <div class="ci-response" id="rn"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div id="tracker" class="section">
+    <p class="sec-label">— this week — did you show up? —</p>
+    <div class="tracker-list">
+
+      <div class="tracker-card">
+        <div class="tracker-title">Learning / data analytics</div>
+        <div class="days-row">
+          <div class="day-wrap"><span class="day-label">Mon</span><div class="day-circle" onclick="this.classList.toggle('done')">M</div></div>
+          <div class="day-wrap"><span class="day-label">Tue</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Wed</span><div class="day-circle" onclick="this.classList.toggle('done')">W</div></div>
+          <div class="day-wrap"><span class="day-label">Thu</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Fri</span><div class="day-circle" onclick="this.classList.toggle('done')">F</div></div>
+          <div class="day-wrap"><span class="day-label">Sat</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+          <div class="day-wrap"><span class="day-label">Sun</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+        </div>
+        <div class="tracker-note"><input type="text" placeholder="What did you work on?" /></div>
+      </div>
+
+      <div class="tracker-card">
+        <div class="tracker-title">Left the house / went out</div>
+        <div class="days-row">
+          <div class="day-wrap"><span class="day-label">Mon</span><div class="day-circle" onclick="this.classList.toggle('done')">M</div></div>
+          <div class="day-wrap"><span class="day-label">Tue</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Wed</span><div class="day-circle" onclick="this.classList.toggle('done')">W</div></div>
+          <div class="day-wrap"><span class="day-label">Thu</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Fri</span><div class="day-circle" onclick="this.classList.toggle('done')">F</div></div>
+          <div class="day-wrap"><span class="day-label">Sat</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+          <div class="day-wrap"><span class="day-label">Sun</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+        </div>
+        <div class="tracker-note"><input type="text" placeholder="Where did you go?" /></div>
+      </div>
+
+      <div class="tracker-card">
+        <div class="tracker-title">Body care & home clean</div>
+        <div class="days-row">
+          <div class="day-wrap"><span class="day-label">Mon</span><div class="day-circle" onclick="this.classList.toggle('done')">M</div></div>
+          <div class="day-wrap"><span class="day-label">Tue</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Wed</span><div class="day-circle" onclick="this.classList.toggle('done')">W</div></div>
+          <div class="day-wrap"><span class="day-label">Thu</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Fri</span><div class="day-circle" onclick="this.classList.toggle('done')">F</div></div>
+          <div class="day-wrap"><span class="day-label">Sat</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+          <div class="day-wrap"><span class="day-label">Sun</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+        </div>
+        <div class="tracker-note"><input type="text" placeholder="What did you take care of?" /></div>
+      </div>
+
+      <div class="tracker-card">
+        <div class="tracker-title">Made something / created</div>
+        <div class="days-row">
+          <div class="day-wrap"><span class="day-label">Mon</span><div class="day-circle" onclick="this.classList.toggle('done')">M</div></div>
+          <div class="day-wrap"><span class="day-label">Tue</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Wed</span><div class="day-circle" onclick="this.classList.toggle('done')">W</div></div>
+          <div class="day-wrap"><span class="day-label">Thu</span><div class="day-circle" onclick="this.classList.toggle('done')">T</div></div>
+          <div class="day-wrap"><span class="day-label">Fri</span><div class="day-circle" onclick="this.classList.toggle('done')">F</div></div>
+          <div class="day-wrap"><span class="day-label">Sat</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+          <div class="day-wrap"><span class="day-label">Sun</span><div class="day-circle" onclick="this.classList.toggle('done')">S</div></div>
+        </div>
+        <div class="tracker-note"><input type="text" placeholder="What did you make or build?" /></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  ✦ &nbsp; sarah &nbsp; · &nbsp; 2025 &nbsp; ✦
+</footer>
+
+<script>
+  const RESP = {
+    e: {
+      high:  "Good. Don't waste it overthinking. Open one learning resource right now — before the feeling fades.",
+      mid:   "Okay is enough to start. You don't need momentum to begin — you begin to get momentum. Pick one thing.",
+      low:   "That's real. Rest if you genuinely need it. But check: is this tired, or is this avoidance? You usually know.",
+      stuck: "You're in your head again. The way out is not thinking harder — it's doing something small and physical. Stand up. Go outside. Come back."
+    },
+    a: {
+      doing:   "This is it. This is what it looks like. Keep going — not because it's always easy, but because you already proved today that you can.",
+      some:    "A bit is not nothing. But what would 'mostly doing' look like tomorrow? One more decision toward that.",
+      avoiding:"You already know this. The question is: what are you actually afraid of finding out? You're more capable than the avoidance suggests.",
+      spiral:  "Overthinking is not preparation. It's a way to feel productive without risking anything. Pick the smallest possible next step and do only that."
+    },
+    n: {
+      push:   "You've said before that time passes whether you use it or not. It's passing right now. What are you doing with it?",
+      remind: "You're building a version of yourself that earns her own money, knows her craft, moves her body, and makes beautiful things. That person starts with today.",
+      small:  "Open your learning platform. Do 20 minutes. That's it — not a session, not a plan. Just 20 minutes and you're done.",
+      rest:   "Yes. Rest properly — not phone-in-bed rest. Sleep, eat, go outside. Come back tomorrow."
+    }
+  };
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleGoal(card) {
+    card.classList.toggle('open');
+  }
+
+  function respond(btn, type, val) {
+    const card = btn.closest('.ci-card');
+    card.querySelectorAll('.ci-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    const el = document.getElementById('r' + type);
+    el.textContent = RESP[type][val];
+    el.classList.add('show');
+  }
+</script>
+</body>
+</html>
